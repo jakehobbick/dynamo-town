@@ -318,3 +318,11 @@ export const BUILDINGS: BuildingDef[] = [
 
 export const BUILDING: Record<string, BuildingDef> = Object.fromEntries(BUILDINGS.map((d) => [d.id, d]));
 export const REAL_BUILDINGS = BUILDINGS.filter((d) => !d.decor);
+
+// Builders need feeding: homes, harbor, campus, sanctuary and sky buildings also cost food,
+// so farms matter beyond growing the population.
+const FED = new Set(['residential', 'harbor', 'campus', 'gecko', 'sky']);
+for (const d of BUILDINGS) {
+  if (d.decor || !FED.has(d.district)) continue;
+  for (const t of d.tiers) if (t.cost.food == null) t.cost.food = Math.max(5, Math.round(((t.cost.energy || 0) * 0.35) / 5) * 5);
+}

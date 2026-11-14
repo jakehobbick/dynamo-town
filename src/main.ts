@@ -50,7 +50,7 @@ function loop(tms: number) {
     } else {
       readSensors(dt, { mode: 'idle' });
       tick(dt / 3600, false);
-      RS.grid = G.s.res.energy > 1 ? 0.75 : 0.2;
+      RS.grid = G.s.res.energy > 1 ? 0.85 : 0.45;
     }
     G.s.lastTick = now();
     RS.power = sens.powerSm;

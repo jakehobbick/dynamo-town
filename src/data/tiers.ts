@@ -9,8 +9,8 @@ export interface TownTier {
 }
 
 export const TIERS: TownTier[] = [
-  { name: 'Outpost', kj: 0, icon: '⛺', blurb: 'A dynamo, a few cottages and a field.', reward: { sparks: 0, gold: 0 } },
-  { name: 'Hamlet', kj: 2500, icon: '🏘️', blurb: 'Copperworks opens: workshops and battery banks.', reward: { sparks: 2, gold: 80 } },
+  { name: 'Outpost', kj: 0, icon: '⛺', blurb: 'A dynamo, a few cottages, a field and a workshop.', reward: { sparks: 0, gold: 0 } },
+  { name: 'Hamlet', kj: 2500, icon: '🏘️', blurb: 'Townhouses, a Town Hall, sawmills and dairy barns. Masonry research.', reward: { sparks: 2, gold: 80 } },
   { name: 'Village', kj: 10000, icon: '🏡', blurb: 'Tidewater Harbor opens on the western shore.', reward: { sparks: 3, gold: 200 } },
   { name: 'Town', kj: 25000, icon: '🏛️', blurb: 'Lumen Campus opens: research takes off. Apartments allowed.', reward: { sparks: 4, gold: 400 } },
   { name: 'Borough', kj: 50000, icon: '🌿', blurb: 'The Gecko Sanctuary opens in the southern jungle.', reward: { sparks: 6, gold: 700 } },

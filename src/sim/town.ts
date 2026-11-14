@@ -154,8 +154,8 @@ export const isDynamoTile = (x: number, y: number) => x >= DYNAMO.x && y >= DYNA
 
 // ---------- plots ----------
 export function plotCost(): Cost {
-  const n = Math.max(0, G.s.plots.length - START_PLOTS.length);
-  return { energy: Math.round(200 * Math.pow(1.35, n)), gold: Math.round(40 * Math.pow(1.4, n)), materials: Math.round(60 * Math.pow(1.3, n)) };
+  const n = Math.max(0, G.s.plots.length - 3);
+  return { energy: Math.round(200 * Math.pow(1.35, n)), gold: Math.round(40 * Math.pow(1.4, n)), materials: Math.round(60 * Math.pow(1.3, n)), food: Math.round(80 * Math.pow(1.35, n)) };
 }
 export function plotBuyable(p: number): Lock {
   if (G.s.plots.includes(p)) return { ok: false, why: 'Owned' };

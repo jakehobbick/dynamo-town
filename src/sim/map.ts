@@ -11,13 +11,13 @@ export const PLOTS = N / PLOT; // 5
 export const PLOT_LAYOUT: DistrictId[][] = [
   ['sky', 'sky', 'campus', 'campus', 'industry'],
   ['sky', 'residential', 'residential', 'campus', 'industry'],
-  ['harbor', 'residential', 'residential', 'residential', 'industry'],
+  ['harbor', 'residential', 'residential', 'industry', 'industry'],
   ['harbor', 'farms', 'farms', 'residential', 'industry'],
   ['harbor', 'harbor', 'farms', 'gecko', 'gecko'],
 ];
 
 export const CORE_PLOT = 2 * PLOTS + 2;
-export const START_PLOTS = [CORE_PLOT, 2 * PLOTS + 1, 3 * PLOTS + 2];
+export const START_PLOTS = [CORE_PLOT, 2 * PLOTS + 1, 3 * PLOTS + 2, 2 * PLOTS + 3];
 export const DYNAMO = { x: 19, y: 19, size: 2 };
 
 export const plotOf = (x: number, y: number) => Math.floor(y / PLOT) * PLOTS + Math.floor(x / PLOT);

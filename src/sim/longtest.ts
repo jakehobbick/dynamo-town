@@ -47,7 +47,7 @@ export function autoSpend() {
       const spot = findSpot(d.id);
       if (spot && place(d.id, spot[0], spot[1])) did = true;
     }
-    if (!did) {
+    if (!did || G.s.plots.length < 4 + G.s.tier * 2) {
       const c = plotCost();
       for (let p = 0; p < PLOTS * PLOTS; p++) if (plotBuyable(p).ok && canAfford(c)) {
         if (buyPlot(p)) {
