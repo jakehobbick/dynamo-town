@@ -1,0 +1,62 @@
+// Shared, cohesive palette: warm pastels with ink outlines (Townscaper-ish).
+import type { Mat } from '../prims';
+
+export const C = {
+  cream: '#f3e6cc',
+  plaster: '#efe2c4',
+  peach: '#f2b48c',
+  rose: '#e98a8a',
+  coral: '#e8735a',
+  mint: '#9fd8b4',
+  sage: '#a8c59a',
+  sky: '#9cc9e6',
+  teal: '#5fb3a7',
+  lilac: '#b7a6dc',
+  butter: '#f5d478',
+  brick: '#c4664a',
+  brick2: '#b05a43',
+  stone: '#c8bfae',
+  stone2: '#a99f8f',
+  wood: '#b98458',
+  wood2: '#8e5f3c',
+  roofRed: '#c8553d',
+  roofTerra: '#d47148',
+  roofBlue: '#5a7fa8',
+  roofSlate: '#5f6273',
+  roofGreen: '#5f9a6b',
+  thatch: '#d8b569',
+  copper: '#c9824a',
+  copperV: '#5fb3a0', // verdigris
+  brass: '#d9a441',
+  steel: '#9aa3ad',
+  iron: '#5c5f6b',
+  glass: '#a7d3e8',
+  white: '#fbf6ec',
+  navy: '#3e4a6b',
+  grass: '#8ccf6a',
+};
+
+export const M = {
+  plaster: { col: C.plaster, tex: 'stucco' } as Mat,
+  peach: { col: C.peach, tex: 'stucco' } as Mat,
+  brick: { col: C.brick, tex: 'brick' } as Mat,
+  brick2: { col: C.brick2, tex: 'brick' } as Mat,
+  stone: { col: C.stone, tex: 'stone' } as Mat,
+  stoneDark: { col: C.stone2, tex: 'stone' } as Mat,
+  plank: { col: C.wood, tex: 'plank' } as Mat,
+  barn: { col: '#c0473b', tex: 'vplank' } as Mat,
+  log: { col: '#a87a52', tex: 'log' } as Mat,
+  metal: { col: C.steel, tex: 'metal' } as Mat,
+  ironM: { col: C.iron, tex: 'metal' } as Mat,
+  copper: { col: C.copper, tex: 'metal', k: 0.6 } as Mat,
+  glass: { col: C.glass, tex: 'glass' } as Mat,
+  thatch: { col: C.thatch, tex: 'thatch' } as Mat,
+  tileRed: { col: C.roofRed, tex: 'tile' } as Mat,
+  tileTerra: { col: C.roofTerra, tex: 'tile' } as Mat,
+  shingleBlue: { col: C.roofBlue, tex: 'shingle' } as Mat,
+  shingleGreen: { col: C.roofGreen, tex: 'shingle' } as Mat,
+  slate: { col: C.roofSlate, tex: 'slate' } as Mat,
+  white: { col: C.white, tex: 'stucco', k: 0.5 } as Mat,
+};
+
+export const paint = (col: string, tex: Mat['tex'] = 'stucco', k = 0.7): Mat => ({ col, tex, k });

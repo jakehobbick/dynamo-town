@@ -148,7 +148,7 @@ export const BUILDINGS: BuildingDef[] = [
     ['Sawtooth-roof shed', { energy: 900, materials: 400, gold: 120 }, { prod: { materials: 16, gold: 6 } }],
     ['Assembly hall and loading bay', { energy: 2000, materials: 900, gold: 300 }, { prod: { materials: 28, gold: 10 } }],
     ['Clockwork mega-works', { energy: 4500, materials: 2000, gold: 700, sparks: 3 }, { prod: { materials: 45, gold: 16 } }],
-  ], { needs: 'assembly' }),
+  ], { size: 2, needs: 'assembly' }),
   b('battery', 'Battery Bank', 'industry', '🔋', 'Stores more of your energy between rides.', 0.2, [
     ['Lead-acid racks', { energy: 150, materials: 60 }, { battery: 400 }],
     ['Copper cells', { energy: 400, materials: 160, gold: 40 }, { battery: 900 }],
@@ -212,7 +212,7 @@ export const BUILDINGS: BuildingDef[] = [
     ['College hall', { energy: 1500, materials: 700, gold: 250 }, { prod: { research: 10 }, boost: { research: 0.08 }, happiness: 4 }],
     ['Spired quadrangle', { energy: 3500, materials: 1500, gold: 600 }, { prod: { research: 18 }, boost: { research: 0.14 }, happiness: 6 }],
     ['Clock-spire university', { energy: 8000, materials: 3200, gold: 1300, sparks: 4 }, { prod: { research: 30 }, boost: { research: 0.2 }, happiness: 9 }],
-  ], { max: 1 }),
+  ], { size: 2, max: 1 }),
   b('aerolab', 'Wind Tunnel', 'campus', '🌀', 'Aero research makes every ride count for more.', 1.0, [
     ['Fan tunnel', { energy: 1200, materials: 500, gold: 200 }, { prod: { research: 4 }, boost: { rideEnergy: 0.03 } }],
     ['Smoke-wand test hall', { energy: 2800, materials: 1100, gold: 450, sparks: 1 }, { prod: { research: 7 }, boost: { rideEnergy: 0.05 } }],
@@ -224,7 +224,7 @@ export const BUILDINGS: BuildingDef[] = [
     ['Glass terrarium', { energy: 1200, materials: 500, gold: 200 }, { happiness: 8, prod: { research: 3 } }],
     ['Misting dome with vines', { energy: 2800, materials: 1100, gold: 450 }, { happiness: 12, prod: { research: 5 } }],
     ['Bioluminescent biodome', { energy: 6000, materials: 2400, gold: 1000, sparks: 3 }, { happiness: 18, prod: { research: 8 } }],
-  ]),
+  ], { size: 2 }),
   b('nursery', 'Gecko Nursery', 'gecko', '🥚', 'Hatchlings! Visitors pay to see them.', 0.5, [
     ['Incubator hut', { energy: 1000, materials: 400, gold: 150 }, { prod: { gold: 8 }, happiness: 5 }],
     ['Hatchery with viewing windows', { energy: 2400, materials: 900, gold: 380 }, { prod: { gold: 14 }, happiness: 8 }],
@@ -256,7 +256,7 @@ export const BUILDINGS: BuildingDef[] = [
     ['Arched hangar', { energy: 3500, materials: 1500, gold: 600 }, { prod: { materials: 30, gold: 8 } }],
     ['Hangar with a gondola crane', { energy: 8000, materials: 3200, gold: 1300 }, { prod: { materials: 50, gold: 14 } }],
     ['Cloud foundry', { energy: 17000, materials: 7000, gold: 2800, sparks: 5 }, { prod: { materials: 80, gold: 22 } }],
-  ], { needs: 'airships' }),
+  ], { size: 2, needs: 'airships' }),
   b('cloudgarden', 'Cloud Garden', 'sky', '☁️', 'Flowers that grow on clouds.', 0.3, [
     ['Puffy planters', { energy: 1500, materials: 600, gold: 250 }, { happiness: 10, prod: { food: 10 } }],
     ['Floating terraces', { energy: 3500, materials: 1400, gold: 600 }, { happiness: 14, prod: { food: 18 } }],

@@ -4,7 +4,7 @@ A running log of the calls I made while building Dynamo Town without check-ins. 
 
 ## Platform and tooling
 - **TypeScript + Vite + Canvas2D, no framework.** The UI is plain DOM sheets over a full-screen canvas. PixiJS isn't needed for this style; Canvas2D with cached sprites is plenty on an iPad, and there's one less dependency to break in Bluefy.
-- **Deploy = GitHub Actions → `gh-pages` branch.** The workflow builds, runs tests, and force-pushes `dist/` to `gh-pages`. I couldn't reach the GitHub Pages settings API from the build environment, so I also pushed the first build to `gh-pages` directly. Pushing that branch normally switches Pages on by itself. If the site doesn't load, set **Settings → Pages → Source: Deploy from a branch → `gh-pages` / root** (one-time).
+- **Deploy = GitHub Actions → `gh-pages` branch.** The workflow builds, runs tests, and force-pushes `dist/` to `gh-pages`. I couldn't reach the GitHub Pages settings API from the build environment. A push to `gh-pages` from the Actions token didn't switch Pages on, but a normal push to that branch did. Pages is now enabled (source: `gh-pages` / root) and builds on every deploy.
 - **`base: './'`** in Vite, so the build works under `/dynamo-town/` and from any static host.
 
 ## Saves
