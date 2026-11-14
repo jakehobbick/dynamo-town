@@ -7,7 +7,7 @@ import { RES_NODE } from '../data/research';
 import { clamp } from '../core/util';
 import { emit } from '../core/bus';
 
-export const BASE_BATTERY = 600;
+export const BASE_BATTERY = 1200;
 export const RIDE_PROD_MULT = 2.5; // the grid is fully powered while you ride
 export const OVERFLOW_GOLD = 0.2; // gold per kJ that doesn't fit in the battery
 export const FOOD_PER_CITIZEN = 0.12; // per hour

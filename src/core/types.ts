@@ -134,12 +134,17 @@ export interface Citizen {
   done: number; // requests fulfilled
 }
 
-export type CitizenRequest =
-  | { kind: 'build'; type: string; count: number; text: string; reward: Cost & { happiness?: number } }
+export type CitizenRequest = ReqBase &
+  ({ kind: 'build'; type: string; count: number; text: string; reward: Cost & { happiness?: number } }
   | { kind: 'upgrade'; type: string; tier: number; text: string; reward: Cost & { happiness?: number } }
   | { kind: 'event'; event: string; text: string; reward: Cost & { happiness?: number } }
   | { kind: 'ride'; kj: number; text: string; reward: Cost & { happiness?: number } }
-  | { kind: 'research'; node: string; text: string; reward: Cost & { happiness?: number } };
+  | { kind: 'research'; node: string; text: string; reward: Cost & { happiness?: number } });
+export interface ReqBase {
+  base?: number;
+  met?: boolean;
+  at?: number;
+}
 
 export interface CharterGoal {
   id: string;
@@ -213,6 +218,7 @@ export interface Stats {
   sprints: number;
   overflowGold: number;
   maxPop: number;
+  perfect: number;
 }
 
 export interface Decor {

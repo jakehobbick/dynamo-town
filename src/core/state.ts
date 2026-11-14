@@ -55,6 +55,7 @@ export function emptyStats(): Stats {
     sprints: 0,
     overflowGold: 0,
     maxPop: 0,
+    perfect: 0,
   };
 }
 

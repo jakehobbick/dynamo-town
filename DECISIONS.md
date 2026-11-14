@@ -19,3 +19,19 @@ A running log of the calls I made while building Dynamo Town without check-ins. 
 - **Virtual gearing** uses Crank Crypt's no-gears technique: the game computes watts from cadence with a cubic gear law and sends them as ERG targets. There are now 24 gears (Zwift Ride has 24) at 6.5% steps. Center gear at 90 rpm = 0.8 × FTP (the Crank Crypt "feel" default).
 - **Events use true ERG** for their targets. The Zwift Ride shift buttons nudge ERG ±2% (the "bias") during ERG segments and change gear in free and sprint segments.
 - Sprints switch to virtual-gear mode (ERG can't do "all-out"). The throttle on gear-power updates drops from 900 ms to 300 ms during sprints so the resistance follows your cadence quickly.
+
+## Ride and events
+- **Three ride modes.** *Event Ride*: 5 min free warm-up → the event → free riding until you tap Finish. *Structured Plan*: warm-up → events chained greedily to fill 30/45/60/90 min (with 2-min recoveries, no two hard events back-to-back, a featured event first) → steady Z2 filler → cool-down. Plans are deterministic per day, so the preview matches the ride. *Free Ride*: virtual gears, energy × zone multiplier (Z2 ×1.05 … Z6+ ×1.25).
+- **Compliance scoring.** Each second of a *work* segment counts, except the first 8 s (ERG ramp lag). The second is "in band" if 3 s-ish power is within ±5% of target. Cadence drills also need ≥ target rpm − 3. Sprints score `avg / (1.4 × FTP)`, capped at 1. Event score = in-band seconds / counted seconds.
+- **Rewards.** ≥ 80% = full rewards + spark crystals + a keepsake decoration placed in town. Below that, rewards scale with the score (sparks floored). Ending a ride mid-event gives partial credit. Nothing is ever taken away.
+- **12 events** (spec asked ≥ 8): Factory Order (sweet spot), Storm Blackout (VO2 5×3'), Festival Night (45' Z2), Lightning Surge (3×20 s sprints), Harbor Tide (over-unders), Harvest Haul (2×12' tempo), Bridge Raising (2×8' threshold), Heat Wave (10×30/30), Night Shift (cadence drills), Morning Commute (ramp), Lantern Walk (recovery), Airship Launch (pyramid), plus Gecko Hatching (3×6' at 85%). Three "featured" events per day pay +25%.
+- **Storm Blackout visual:** up to five owned districts go dark (windows, animations, power-line pulses) and each completed VO2 interval restores one.
+- **ERG bias:** shift buttons nudge ERG ±2% per press (−20% … +10%). The bias applies fully to work segments; on easy segments only a negative bias carries over, so you can make recoveries easier but not harder.
+- **Auto-pause** after 6 s with no power or cadence; pedalling resumes the ride. A Bluetooth drop pauses with a "reconnecting" overlay while the trainer reconnects in the background (exponential backoff, no extra tap needed because `gatt.connect()` on a known device doesn't need a user gesture).
+- **Energy accounting.** Raw rider kJ (power × time) counts toward *lifetime kJ* and town tiers. The battery receives kJ × (1 + ride-energy bonuses) × free-ride zone multiplier, plus event bonus energy. When the battery is full, the overflow is sold for gold (0.2 gold/kJ), so effort is never wasted.
+- The base battery is 1,200 kJ, so a first 45-minute ride fits without overflowing.
+
+## Economy
+- Resources: Energy (kJ), Food, Materials, Research, Gold, plus rare **Spark crystals** from events, tiers and charters (used for top-tier upgrades and special research).
+- While riding, the grid is "fully powered": production ×2.5 and no battery drain. At rest, buildings draw a small idle load (≈0.1–1.6 kJ/h each). If the battery empties, production *pauses*; nothing decays and the population never shrinks.
+- Population grows toward `homes × (0.55 + happiness/220)` while there is food. Happiness = amenities per capita + a temporary festive glow from events (fades over ~2 days).

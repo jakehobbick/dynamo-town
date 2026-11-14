@@ -2,7 +2,7 @@
 // day (normal), dark (night-tinted copy) and lights (emissive windows/lamps, drawn additively).
 import { BUILDING } from '../data/buildings';
 import { env } from './prims';
-import { ART, TOP } from './art/town1';
+import { ANIM, ART, TOP } from './art/town1';
 import './art/town2';
 import type { Season } from './terrain';
 
@@ -119,7 +119,23 @@ export function thumbURL(type: string, tier: number, season: Season, px = 96): s
   const key = `${type}|${tier}|${season}|${px}`;
   const u = thumbs.get(key);
   if (u) return u;
-  const sp = getSprite(type, tier, 1, season, 2, true)!;
+  const sp0 = getSprite(type, tier, 1, season, 2, true)!;
+  // composite the animated parts at a nice moment so thumbnails show balloons, boats, sails...
+  const comp = document.createElement('canvas');
+  comp.width = sp0.w;
+  comp.height = sp0.h;
+  const cc = comp.getContext('2d')!;
+  cc.drawImage(sp0.day, 0, 0);
+  const an = ANIM[BUILDING[type]?.art || type];
+  if (an) {
+    cc.setTransform(sp0.s, 0, 0, sp0.s, sp0.ax, sp0.ay);
+    env.season = season;
+    try {
+      an(cc, tier, 2.3, 0.8, 1);
+    } catch {}
+    cc.setTransform(1, 0, 0, 1, 0, 0);
+  }
+  const sp = { ...sp0, day: comp };
   // crop to the opaque bounding box so thumbnails fill their card
   let bx0 = 0, by0 = 0, bx1 = sp.w, by1 = sp.h;
   try {
