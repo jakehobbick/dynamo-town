@@ -14,6 +14,7 @@ import { RS } from './rstate';
 import { drawAtmosphere, drawFireworks, drawOcean, tintGround, updateSky } from './sky';
 import { drawWalker, updateWalkers, walkers } from './citizens';
 import { env } from './prims';
+import { glow } from './art/fx';
 
 let cv: HTMLCanvasElement, ctx: CanvasRenderingContext2D;
 let W = 0, H = 0, DPR = 1;
@@ -38,7 +39,7 @@ export const viewSize = () => ({ W, H, DPR });
 
 function bucket(z: number) {
   const b = z < 0.7 ? 0.5 : z < 1.4 ? 1 : 2;
-  return Math.min(b * DPR, 3);
+  return Math.min(b * DPR, 2.5);
 }
 
 interface Obj {
@@ -49,6 +50,7 @@ interface Obj {
 export function frame(dt: number, t: number) {
   RS.time = t;
   newFrame();
+  animBudget = RS.lowFx ? 60 : 160;
   updateCam(dt);
   clampCam();
   updateSky(dt);
@@ -56,7 +58,7 @@ export function frame(dt: number, t: number) {
   const c = ctx;
   c.setTransform(DPR, 0, 0, DPR, 0, 0);
   c.imageSmoothingEnabled = true;
-  drawOcean(c, W, H, t);
+  if (!RS.skip.ocean) drawOcean(c, W, H, t);
   const z = cam.zoom;
   const sc = bucket(z);
   // ---------- terrain ----------
@@ -68,6 +70,7 @@ export function frame(dt: number, t: number) {
     const sx = (ox - cam.x) * z + W / 2, sy = (oy - cam.y) * z + H / 2;
     const w = PLOT * TW * z, h = (PLOT * TH + 18) * z;
     if (sx > W || sy > H || sx + w < 0 || sy + h < 0) continue;
+    if (RS.skip.terrain) continue;
     const ch = chunk(p, sc, RS.season);
     c.drawImage(ch.cv, sx, sy, ch.cv.width / sc * z, ch.cv.height / sc * z);
   }
@@ -108,13 +111,13 @@ export function frame(dt: number, t: number) {
     objs.push({ key: w.x + w.y - 0.01, draw: () => drawWalker(c, w, sx, sy, z, t) });
   }
   objs.sort((a, b) => a.key - b.key);
-  for (const o of objs) o.draw();
+  if (!RS.skip.objs) for (const o of objs) o.draw();
   // ---------- overlays ----------
-  powerLines(c, z, t);
+  if (!RS.skip.lines) powerLines(c, z, t);
   if (RS.ghost) drawGhost(c, z, sc, t);
   drawFireworks(c, W, H, t);
-  drawAtmosphere(c, W, H, t);
-  vignette(c);
+  if (!RS.skip.atmo) drawAtmosphere(c, W, H, t);
+  if (!RS.skip.vig) vignette(c);
 }
 
 function drawBuilding(type: string, tier: number, id: number, x: number, y: number, z: number, sc: number, t: number, nightA: number, age: number, selected: boolean, alpha = 1) {
@@ -159,8 +162,8 @@ function drawBuilding(type: string, tier: number, id: number, x: number, y: numb
     c.globalAlpha = nightA * (alpha < 1 ? alpha : 1);
     c.drawImage(darkOf(sp), dx, dy, dw, dh);
   }
-  const lk = lightLevel(x, y) * (0.25 + nightA * 0.95);
-  if (lk > 0.02 && sp.hasLights) {
+  const lk = nightA > 0.04 ? lightLevel(x, y) * Math.min(1, nightA * 1.25) : 0;
+  if (lk > 0.02 && sp.hasLights && !RS.skip.light) {
     c.globalCompositeOperation = 'lighter';
     c.globalAlpha = Math.min(1, lk) * (alpha < 1 ? alpha : 1);
     c.drawImage(sp.lights, dx, dy, dw, dh);
@@ -169,7 +172,7 @@ function drawBuilding(type: string, tier: number, id: number, x: number, y: numb
   c.globalAlpha = alpha;
   // animated bits
   const an = ANIM[def?.art || type];
-  if (an && !(RS.lowFx && z < 0.6)) {
+  if (an && !RS.skip.anim && z >= (RS.lowFx ? 0.7 : 0.5) && animBudget-- > 0) {
     c.setTransform(DPR * z, 0, 0, DPR * z, DPR * p.x, DPR * p.y);
     env.season = RS.season;
     try {
@@ -181,6 +184,7 @@ function drawBuilding(type: string, tier: number, id: number, x: number, y: numb
   if (building) dust(c, p.x, p.y + size * 16 * z, z, age, size);
 }
 
+let animBudget = 200;
 const easeOut = (x: number) => 1 - Math.pow(1 - x, 3);
 
 function lightLevel(x: number, y: number) {
@@ -287,11 +291,7 @@ function powerLines(c: CanvasRenderingContext2D, z: number, t: number) {
       const s = ((t * (0.25 + k * 0.7) + i / n + hash(p) ) % 1);
       const x = (1 - s) * (1 - s) * hub.x + 2 * (1 - s) * s * mx + s * s * e.x;
       const y = (1 - s) * (1 - s) * hub.y + 2 * (1 - s) * s * my + s * s * e.y;
-      const g = c.createRadialGradient(x, y, 0, x, y, 6 * z);
-      g.addColorStop(0, `rgba(255,236,150,${0.9 * Math.min(1, k + 0.2)})`);
-      g.addColorStop(1, 'rgba(255,200,90,0)');
-      c.fillStyle = g;
-      c.fillRect(x - 6 * z, y - 6 * z, 12 * z, 12 * z);
+      glow(c, x, y, 6 * z, '255,226,130', 0.9 * Math.min(1, k + 0.2));
     }
   }
 }
@@ -343,12 +343,25 @@ function drawGhost(c: CanvasRenderingContext2D, z: number, sc: number, t: number
   drawBuilding(g.type, 0, 1, g.x, g.y, z, sc, t, 0, 99, false, g.ok ? 0.8 : 0.45);
 }
 
+let vigCv: HTMLCanvasElement | null = null;
+let vigKey = '';
 function vignette(c: CanvasRenderingContext2D) {
-  const g = c.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.45, W / 2, H / 2, Math.max(W, H) * 0.8);
-  g.addColorStop(0, 'rgba(20,20,40,0)');
-  g.addColorStop(1, `rgba(20,20,40,${0.18 + RS.night * 0.25})`);
-  c.fillStyle = g;
-  c.fillRect(0, 0, W, H);
+  const key = `${W}x${H}`;
+  if (!vigCv || vigKey !== key) {
+    vigCv = document.createElement('canvas');
+    vigCv.width = Math.max(1, Math.round(W / 2));
+    vigCv.height = Math.max(1, Math.round(H / 2));
+    const v = vigCv.getContext('2d')!;
+    const g = v.createRadialGradient(W / 4, H / 4, Math.min(W, H) * 0.22, W / 4, H / 4, Math.max(W, H) * 0.4);
+    g.addColorStop(0, 'rgba(20,20,40,0)');
+    g.addColorStop(1, 'rgba(20,20,40,1)');
+    v.fillStyle = g;
+    v.fillRect(0, 0, vigCv.width, vigCv.height);
+    vigKey = key;
+  }
+  c.globalAlpha = 0.18 + RS.night * 0.25;
+  c.drawImage(vigCv, 0, 0, W, H);
+  c.globalAlpha = 1;
 }
 
 /** Render the town into an offscreen canvas for snapshots (share card, before/after). */

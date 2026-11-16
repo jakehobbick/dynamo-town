@@ -13,7 +13,9 @@ import { ACH } from './data/achievements';
 import { TIERS } from './data/tiers';
 import { EVENT } from './data/events';
 import { PLOT, PLOTS, plotDistrict } from './sim/map';
-import { initRenderer, frame, snapshot } from './render/renderer';
+import { initRenderer, frame, snapshot, resize } from './render/renderer';
+import { clearTerrain } from './render/terrain';
+import { clearSprites } from './render/sprites';
 import { initInput, inputState } from './render/input';
 import { cam, focusTile } from './render/iso';
 import { RS } from './render/rstate';
@@ -37,7 +39,7 @@ const during: { unlocked: string[]; tierUp: number[] } = { unlocked: [], tierUp:
 
 // ------------- main loop -------------
 let last = performance.now();
-let uiT = 0, slowT = 0, frames = 0, fpsT = 0;
+let uiT = 0, slowT = 0, frames = 0, fpsT = 0, slowSecs = 0;
 function loop(tms: number) {
   const dt = Math.min(0.1, (tms - last) / 1000);
   last = tms;
@@ -59,7 +61,9 @@ function loop(tms: number) {
     RS.crankAngle += (sens.cadSm / 60) * Math.PI * 2 * dt;
     RS.wheelAngle += (sens.cadSm / 60) * Math.PI * 2 * 0.55 * dt;
     RS.lowFx = G.s.settings.quality === 'battery';
+    const f0 = performance.now();
     frame(dt, tms / 1000);
+    RS.frameMs = RS.frameMs * 0.95 + (performance.now() - f0) * 0.05;
   } catch (e) {
     console.error(e);
   }
@@ -69,6 +73,18 @@ function loop(tms: number) {
   fpsT += dt;
   if (fpsT >= 1) {
     RS.fps = frames / fpsT;
+    // adaptive quality: if High can't hold ~45 fps for a while, step down once
+    if (G.s.settings.quality === 'high' && document.visibilityState === 'visible') {
+      slowSecs = RS.fps < 45 ? slowSecs + 1 : 0;
+      if (slowSecs >= 5) {
+        G.s.settings.quality = 'balanced';
+        resize();
+        clearTerrain();
+        clearSprites();
+        markDirty();
+        toast('Switched to Balanced quality for smoother frames (Settings → Display)');
+      }
+    }
     frames = 0;
     fpsT = 0;
     if (G.s.settings.showFps) {
@@ -77,7 +93,7 @@ function loop(tms: number) {
         fpsEl.className = 'fps';
         document.body.appendChild(fpsEl);
       }
-      fpsEl.textContent = `${Math.round(RS.fps)} fps`;
+      fpsEl.textContent = `${Math.round(RS.fps)} fps · ${RS.frameMs.toFixed(1)} ms`;
     } else if (fpsEl) {
       fpsEl.remove();
       fpsEl = null;
@@ -256,7 +272,7 @@ async function boot() {
   recoverRide();
   addEventListener('pointerdown', () => audioInit(), { once: true });
   addEventListener('keydown', () => audioInit(), { once: true });
-  (window as any).__dt = { G, sim, sens, saveNow, cam, RS, emit, simulateRide, autoSpend, saveInfo, startRide, endRide, finishRide, thumbURL, get ride() { return ride; } };
+  (window as any).__dt = { G, sim, sens, saveNow, cam, RS, emit, simulateRide, autoSpend, saveInfo, startRide, endRide, finishRide, thumbURL, bench: (n = 20, skip: Record<string, boolean> = {}) => { RS.skip = skip; frame(0.016, 1); const t0 = performance.now(); for (let i = 0; i < n; i++) frame(0.016, 1 + i * 0.016); RS.skip = {}; return +((performance.now() - t0) / n).toFixed(1); }, get ride() { return ride; } };
 }
 
 function welcome() {

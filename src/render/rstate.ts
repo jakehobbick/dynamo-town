@@ -27,5 +27,7 @@ export const RS = {
   surge: 0, // capacitor surge glow 0..1
   time: 0,
   fps: 60,
+  frameMs: 0,
+  skip: {} as Record<string, boolean>,
   lowFx: false,
 };

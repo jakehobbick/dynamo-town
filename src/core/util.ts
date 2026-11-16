@@ -60,7 +60,7 @@ export function pick<T>(arr: readonly T[], r: number): T {
 export const fmtInt = (n: number) => Math.round(n).toLocaleString('en-US');
 export function fmtNum(n: number) {
   const a = Math.abs(n);
-  if (a >= 1e6) return (n / 1e6).toFixed(a >= 1e7 ? 0 : 1) + 'M';
+  if (a >= 999500) return (n / 1e6).toFixed(a >= 1e7 ? 0 : 1) + 'M';
   if (a >= 1e4) return (n / 1e3).toFixed(a >= 1e5 ? 0 : 1) + 'k';
   if (a >= 100) return Math.round(n).toLocaleString('en-US');
   if (a >= 10) return n.toFixed(0);

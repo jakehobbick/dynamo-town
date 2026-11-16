@@ -87,13 +87,27 @@ export function arc(c: Ctx, x0: number, y0: number, x1: number, y1: number, t: n
   c.stroke();
 }
 
+const glowCache = new Map<string, HTMLCanvasElement>();
+/** Soft radial glow. Uses a cached sprite per colour instead of building a gradient every frame. */
 export function glow(c: Ctx, x: number, y: number, r: number, col: string, a: number) {
-  if (a <= 0.01) return;
-  const g = c.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, `rgba(${col},${a})`);
-  g.addColorStop(1, `rgba(${col},0)`);
-  c.fillStyle = g;
-  c.fillRect(x - r, y - r, r * 2, r * 2);
+  if (a <= 0.01 || r <= 0.5) return;
+  let g = glowCache.get(col);
+  if (!g) {
+    g = document.createElement('canvas');
+    g.width = g.height = 64;
+    const gc = g.getContext('2d')!;
+    const rg = gc.createRadialGradient(32, 32, 0, 32, 32, 32);
+    rg.addColorStop(0, `rgba(${col},1)`);
+    rg.addColorStop(0.4, `rgba(${col},0.45)`);
+    rg.addColorStop(1, `rgba(${col},0)`);
+    gc.fillStyle = rg;
+    gc.fillRect(0, 0, 64, 64);
+    glowCache.set(col, g);
+  }
+  const pa = c.globalAlpha;
+  c.globalAlpha = pa * Math.min(1, a);
+  c.drawImage(g, x - r, y - r, r * 2, r * 2);
+  c.globalAlpha = pa;
 }
 
 export function bob(t: number, seed = 0, amp = 1) {

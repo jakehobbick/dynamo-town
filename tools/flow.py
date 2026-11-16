@@ -3,10 +3,11 @@ import sys, asyncio
 from playwright.async_api import async_playwright
 async def main():
     steps = sys.argv[1:]
-    w, h = 1180, 820
+    import os
+    w, h = int(os.environ.get('W', 1180)), int(os.environ.get('H', 820))
     async with async_playwright() as p:
         b = await p.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--no-sandbox'])
-        ctx = await b.new_context(viewport={'width': w, 'height': h}, device_scale_factor=2)
+        ctx = await b.new_context(viewport={'width': w, 'height': h}, device_scale_factor=2, has_touch=True, is_mobile=os.environ.get('MOBILE')=='1')
         pg = await ctx.new_page()
         logs = []
         pg.on('console', lambda m: logs.append(f'{m.type}: {m.text}'))
@@ -21,6 +22,9 @@ async def main():
             elif k == 'wait': await pg.wait_for_timeout(int(float(v)*1000))
             elif k == 'shot': await pg.screenshot(path=v)
             elif k == 'click': await pg.click(v)
+            elif k == 'tap':
+                x, y = map(float, v.split(','))
+                await pg.touchscreen.tap(x, y)
             elif k == 'reload':
                 await pg.reload(wait_until='networkidle'); await pg.wait_for_timeout(1000)
         for l in logs:

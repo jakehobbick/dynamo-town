@@ -20,7 +20,7 @@ export function defaultSettings(): Settings {
     weightKg: 75,
     gears: 'virtual',
     gearFeel: 0.8,
-    gear: 6,
+    gear: 12,
     ergBias: 0,
     keys: { ...DEFAULT_KEYS },
     vol: { master: 0.8, music: 0.5, amb: 0.6, sfx: 0.7 },
