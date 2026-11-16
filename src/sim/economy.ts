@@ -77,11 +77,19 @@ export function rates(s: GameState = G.s, riding = false) {
     research: m.prod.research * (1 + m.boost.research) * hm * rm,
     gold: (m.prod.gold + s.pop * TAX_PER_CITIZEN) * (1 + m.boost.gold) * hm * rm,
     foodUse: s.pop * FOOD_PER_CITIZEN,
-    upkeep: m.upkeep * (1 - m.boost.upkeep),
+    upkeep: idleDraw(m.upkeep * (1 - m.boost.upkeep), m.battery, s.res.energy),
   };
   return r;
 }
 
+/**
+ * Gentle idle draw: the raw building load, capped at 0.6% of battery capacity per hour and tapering as the
+ * battery empties, so a full battery lasts about a week of rest and a big town never eats a whole ride overnight.
+ */
+export function idleDraw(raw: number, cap: number, energy: number) {
+  const fill = cap > 0 ? Math.min(1, energy / cap) : 0;
+  return Math.min(raw, cap * 0.006) * (0.35 + 0.65 * fill);
+}
 export const batteryCap = (s: GameState = G.s) => mods(s).battery;
 export const popTarget = (s: GameState = G.s) => Math.floor(mods(s).housing * (0.55 + happiness(s) / 220));
 

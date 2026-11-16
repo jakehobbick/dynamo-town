@@ -6,7 +6,10 @@ import { $, escapeHtml, fmtNum } from '../core/util';
 export const RES_ICON: Record<ResKey, string> = { energy: '⚡', food: '🍞', materials: '🪵', research: '🧪', gold: '🪙', sparks: '✦' };
 export const RES_NAME: Record<ResKey, string> = { energy: 'Energy (kJ)', food: 'Food', materials: 'Materials', research: 'Research', gold: 'Gold', sparks: 'Spark crystals' };
 
+/** Set while the bot or time-skip tools run, so simulated rides don't flood the screen. */
+export const uiQuiet = { on: false };
 export function toast(msg: string, big = false) {
+  if (uiQuiet.on) return;
   const box = $('toast');
   const d = document.createElement('div');
   d.className = 'toast' + (big ? ' big' : '');

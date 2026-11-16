@@ -234,17 +234,28 @@ export function drawAtmosphere(c: CanvasRenderingContext2D, W: number, H: number
   }
 }
 
+let shadowSprite: HTMLCanvasElement | null = null;
+/** Soft, feathered cloud shadows drifting across the town (cached radial sprite, no hard edges). */
 function drawCloudShadows(c: CanvasRenderingContext2D, W: number, H: number, t: number, a: number) {
+  if (!shadowSprite) {
+    shadowSprite = document.createElement('canvas');
+    shadowSprite.width = shadowSprite.height = 128;
+    const g = shadowSprite.getContext('2d')!;
+    const rg = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    rg.addColorStop(0, 'rgba(34,44,72,1)');
+    rg.addColorStop(0.55, 'rgba(34,44,72,0.75)');
+    rg.addColorStop(1, 'rgba(34,44,72,0)');
+    g.fillStyle = rg;
+    g.fillRect(0, 0, 128, 128);
+  }
   c.save();
-  c.globalAlpha = a * (0.12 + (RS.weather === 'storm' ? 0.08 : 0)) * (1 - RS.night * 0.8);
-  c.fillStyle = '#2a3550';
+  c.globalAlpha = a * (0.11 + (RS.weather === 'storm' ? 0.08 : 0)) * (1 - RS.night * 0.8);
   for (let i = 0; i < 5; i++) {
     const x = ((hash(i, 21) * 2 * W + t * (10 + i * 3) - cam.x * cam.zoom * 0.5) % (W * 2) + W * 2) % (W * 2) - W * 0.5;
     const y = ((hash(i, 22) * H - cam.y * cam.zoom * 0.5) % H + H) % H;
-    const r = 120 + hash(i, 23) * 160;
-    c.beginPath();
-    c.ellipse(x, y, r * cam.zoom, r * 0.5 * cam.zoom, 0, 0, 7);
-    c.fill();
+    const r = (150 + hash(i, 23) * 180) * cam.zoom;
+    c.drawImage(shadowSprite, x - r, y - r * 0.5, r * 2, r);
+    c.drawImage(shadowSprite, x - r * 0.3, y - r * 0.55, r * 1.3, r * 0.75);
   }
   c.restore();
 }

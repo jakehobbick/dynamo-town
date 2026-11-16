@@ -1,5 +1,6 @@
 // Long-term progression test: a scripted bot rides real sessions (time-accelerated),
 // a simple "player" spends energy, and the clock skips between rides.
+import { uiQuiet } from '../ui/ui';
 import { G, now } from '../core/state';
 import { markDirty, saveNow } from '../core/save';
 import { fmtInt } from '../core/util';
@@ -20,10 +21,13 @@ export function simulateRide(mode: 'event' | 'plan' | 'free', arg: string | numb
   sens.src = 'sim';
   sim.bot = true;
   sim.speed = 200; // 0.05 s real step = 10 s of riding
+  const q = uiQuiet.on;
+  uiQuiet.on = true;
   startRide(mode, arg);
   let guard = 0;
   while (ride && ride.t < minutes * 60 && guard++ < 20000) updateRide(0.05);
   const r = endRide();
+  uiQuiet.on = q;
   sens.src = prevSrc;
   sim.bot = prevBot;
   sim.speed = prevSpeed;
@@ -76,6 +80,7 @@ export async function runLongTest(weeks: number, progress: (m: string) => void) 
   const lines: string[] = [];
   const start = { kj: G.s.lifetimeKJ, tier: G.s.tier, b: G.s.buildings.length, ach: Object.keys(G.s.achievements).length };
   const plans = [45, 60, 30, 90, 45];
+  uiQuiet.on = true;
   for (let w = 0; w < weeks; w++) {
     const rides = 3 + (w % 2);
     for (let r = 0; r < rides; r++) {
@@ -96,6 +101,7 @@ export async function runLongTest(weeks: number, progress: (m: string) => void) 
     progress(`Week ${w + 1}/${weeks}: ${fmtInt(G.s.lifetimeKJ)} kJ · ${TIERS[G.s.tier].name} · ${G.s.buildings.length} buildings · ${Math.floor(G.s.pop)} citizens`);
     await new Promise((res) => setTimeout(res, 0));
   }
+  uiQuiet.on = false;
   markDirty();
   await saveNow();
   lines.push(`Simulated ${weeks} weeks (${G.s.stats.rides} rides total).`);

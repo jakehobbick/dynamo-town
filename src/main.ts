@@ -1,3 +1,8 @@
+import '@fontsource/fredoka/latin-500.css';
+import '@fontsource/fredoka/latin-600.css';
+import '@fontsource/nunito/latin-500.css';
+import '@fontsource/nunito/latin-700.css';
+import '@fontsource/nunito/latin-800.css';
 import './style.css';
 import { G, newGame, now } from './core/state';
 import { loadGame, saveNow, startAutosave, markDirty, loadActiveRide, clearActiveRide, saveInfo } from './core/save';
@@ -50,6 +55,11 @@ function loop(tms: number) {
       if (ride && !ride.paused) tick((dt * speed) / 3600, true);
       followEvent();
     } else {
+      // returning from a suspended tab (iPad app switch) or a clock jump: catch up idle time properly
+      if (now() - G.s.lastTick > 5000) {
+        const away = idleCatchUp();
+        if (away && away.secs > 600) showAway(away);
+      }
       readSensors(dt, { mode: 'idle' });
       tick(dt / 3600, false);
       RS.grid = G.s.res.energy > 1 ? 0.85 : 0.45;
@@ -75,8 +85,8 @@ function loop(tms: number) {
     RS.fps = frames / fpsT;
     // adaptive quality: if High can't hold ~45 fps for a while, step down once
     if (G.s.settings.quality === 'high' && document.visibilityState === 'visible') {
-      slowSecs = RS.fps < 45 ? slowSecs + 1 : 0;
-      if (slowSecs >= 5) {
+      slowSecs = RS.fps < 45 && RS.frameMs > 11 ? slowSecs + 1 : 0;
+      if (slowSecs >= 8) {
         G.s.settings.quality = 'balanced';
         resize();
         clearTerrain();

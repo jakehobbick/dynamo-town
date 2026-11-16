@@ -139,7 +139,6 @@ function lsSet(k: string, v: string) {
 
 // ---------- public API ----------
 let dirty = false;
-let saving = false;
 let lastSaveAt = 0;
 export const saveInfo = { backend: 'none' as 'idb' | 'ls' | 'none', lastSaveAt: 0, error: '' };
 
@@ -147,27 +146,50 @@ export function markDirty() {
   dirty = true;
 }
 
-/** Save now. Writes IDB and mirrors to localStorage (both best-effort). */
-export async function saveNow(): Promise<void> {
-  if (saving) {
-    dirty = true;
-    return;
+let inflight: Promise<void> | null = null;
+let again = false;
+
+/**
+ * Save now. localStorage is written synchronously first (survives an abrupt page close),
+ * then IndexedDB. If a save is already running, another full save is queued after it,
+ * so a call to saveNow() never returns before the current state is on disk.
+ */
+export function saveNow(): Promise<void> {
+  if (inflight) {
+    again = true;
+    return inflight.then(() => (again ? saveNow() : undefined));
   }
-  saving = true;
+  inflight = doSave().finally(() => {
+    inflight = null;
+  });
+  return inflight;
+}
+
+/** Synchronous best-effort mirror to localStorage (used on pagehide, where async work may never finish). */
+export function saveSync() {
+  try {
+    const json = JSON.stringify(G.s);
+    if (lsSet(LS_KEY, json)) saveInfo.backend = saveInfo.backend === 'none' ? 'ls' : saveInfo.backend;
+    return json;
+  } catch {
+    return null;
+  }
+}
+
+async function doSave() {
+  again = false;
   dirty = false;
   try {
     const s = G.s;
     const json = JSON.stringify(s);
-    const ok = await idbSet(KEY, json);
-    // localStorage mirror (may hit quota on huge saves; that's fine)
     const prev = lsGet(LS_KEY);
     if (prev && Date.now() - lastSaveAt > 10 * 60 * 1000) lsSet(LS_BACKUP, prev);
     const lsOk = lsSet(LS_KEY, json);
+    const ok = await idbSet(KEY, json);
     saveInfo.backend = ok ? 'idb' : lsOk ? 'ls' : 'none';
     saveInfo.error = ok || lsOk ? '' : 'Storage unavailable';
     lastSaveAt = Date.now();
     saveInfo.lastSaveAt = lastSaveAt;
-    // daily rolling backup in IDB
     if (ok) {
       const d = new Date().toISOString().slice(0, 10);
       const bk = (await idbGet('backup_day')) as string | undefined;
@@ -178,8 +200,6 @@ export async function saveNow(): Promise<void> {
     }
   } catch (e: any) {
     saveInfo.error = String(e?.message || e);
-  } finally {
-    saving = false;
   }
 }
 
@@ -233,6 +253,7 @@ export function startAutosave() {
   }, 1500);
   const flush = () => {
     G.s.lastTick = Math.max(G.s.lastTick, now());
+    saveSync();
     saveNow();
   };
   document.addEventListener('visibilitychange', () => {

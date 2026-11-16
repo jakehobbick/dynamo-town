@@ -37,7 +37,7 @@ export function buildTCX(S: Sample[], notes = 'Dynamo Town ride') {
 <TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2" xmlns:ns3="http://www.garmin.com/xmlschemas/ActivityExtension/v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <Activities><Activity Sport="Biking"><Id>${iso(t0)}</Id><Lap StartTime="${iso(t0)}"><TotalTimeSeconds>${Math.round(dur)}</TotalTimeSeconds><DistanceMeters>${dist.toFixed(1)}</DistanceMeters><MaximumSpeed>${maxV.toFixed(2)}</MaximumSpeed><Calories>${Math.round(kj)}</Calories>${hrN ? `<AverageHeartRateBpm><Value>${Math.round(hrS / hrN)}</Value></AverageHeartRateBpm><MaximumHeartRateBpm><Value>${hrMax}</Value></MaximumHeartRateBpm>` : ''}<Intensity>Active</Intensity>${cadN ? `<Cadence>${Math.round(cadS / cadN)}</Cadence>` : ''}<TriggerMethod>Manual</TriggerMethod><Track>
 ${tp}
-</Track></Lap><Notes>${notes.replace(/[<&>]/g, '')}</Notes><Creator xsi:type="Device_t"><Name>Dynamo Town</Name><UnitId>0</UnitId><ProductID>0</ProductID></Creator></Activity></Activities></TrainingCenterDatabase>`;
+</Track></Lap><Notes>${notes.replace(/[<&>]/g, '')}</Notes><Creator xsi:type="Device_t"><Name>Dynamo Town</Name><UnitId>0</UnitId><ProductID>0</ProductID><Version><VersionMajor>1</VersionMajor><VersionMinor>0</VersionMinor><BuildMajor>0</BuildMajor><BuildMinor>0</BuildMinor></Version></Creator></Activity></Activities></TrainingCenterDatabase>`;
 }
 
 export function tcxName(start: number) {

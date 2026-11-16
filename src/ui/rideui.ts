@@ -1,4 +1,5 @@
 // Ride menu (event board, structured plans, free ride), glanceable ride HUD, overlays.
+import { uiQuiet } from './ui';
 import { emit, on } from '../core/bus';
 import { G } from '../core/state';
 import { markDirty } from '../core/save';
@@ -104,6 +105,7 @@ let hud: HTMLElement | null = null;
 export function showRideHUD() {
   hud?.remove();
   hud = document.createElement('div');
+  document.body.classList.add('riding');
   hud.className = 'hud';
   hud.innerHTML = `
     <div class="hudtop">
@@ -157,6 +159,7 @@ export function showRideHUD() {
 export function hideRideHUD() {
   hud?.remove();
   hud = null;
+  document.body.classList.remove('riding');
   overlay?.remove();
   overlay = null;
 }
@@ -271,12 +274,31 @@ on('ride:resumed', () => {
   overlay = null;
 });
 
+const bannerQ: [string, string, number][] = [];
+let bannerBusy = false;
+/** Big centred announcement. Banners queue so two never overlap. */
 export function banner(title: string, sub = '', ms = 3200) {
+  if (uiQuiet.on) return;
+  bannerQ.push([title, sub, ms]);
+  if (bannerQ.length > 4) bannerQ.splice(0, bannerQ.length - 4);
+  if (!bannerBusy) nextBanner();
+}
+function nextBanner() {
+  const n = bannerQ.shift();
+  if (!n) {
+    bannerBusy = false;
+    return;
+  }
+  bannerBusy = true;
+  const [title, sub, ms] = n;
   const b = document.createElement('div');
   b.className = 'banner';
   b.innerHTML = `${title}${sub ? `<small>${sub}</small>` : ''}`;
   $('ui').appendChild(b);
-  setTimeout(() => b.remove(), ms);
+  setTimeout(() => {
+    b.remove();
+    nextBanner();
+  }, bannerQ.length ? Math.min(ms, 2600) : ms);
 }
 
 on('event:start', (ev: any) => {
