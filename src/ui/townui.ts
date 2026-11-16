@@ -178,7 +178,16 @@ function confirmPlace() {
       emit('built', b);
       // stay in placement mode while affordable
       if (!canAfford(BUILDING[b.type].tiers[0].cost) || !typeAvailable(BUILDING[b.type]).ok) setMode({ kind: 'town' });
-      else RS.ghost = null;
+      else {
+        RS.ghost = null;
+        const why = $('pbWhy');
+        if (why) {
+          why.textContent = 'Tap another tile to build one more';
+          why.style.color = '';
+        }
+        const ok = $('pbOk') as HTMLButtonElement | null;
+        if (ok) ok.disabled = true;
+      }
     }
   } else if (mode.kind === 'move') {
     const b = G.s.buildings.find((x) => x.id === (mode as any).id)!;
