@@ -59,7 +59,7 @@ A running log of the calls I made while building Dynamo Town without check-ins. 
 ## Export, import, share (M9)
 - TCX: 1 s trackpoints, `Watts` via the Garmin ActivityExtension v2 (`ns3:TPX`), lap totals, and a `Creator` with the schema-required `Version` (Crank Crypt's TCX omitted it). The TCX is checked as well-formed and round-tripped through the importer in tests. Garmin's XSD host wasn't reachable from the build environment, so I didn't run a formal XSD validation; Crank Crypt's near-identical TCX already uploads to Garmin for you.
 - Distance in the TCX is a virtual flat-road speed from power (75 kg, CdA 0.32, Crr 0.004), so Garmin/Strava show a plausible distance and speed.
-- Imports credit 50% of energy by default (adjustable in Settings). Power files use mechanical kJ; files without power use calories × 0.25 ≈ mechanical kJ (gross efficiency ~24%). Dedupe: an import key per start minute, plus a fuzzy match (start within 5 min, duration within 15%) against existing rides, including ones recorded in-game.
+- Imports credit 50% of energy by default (adjustable in Settings). Power files use mechanical kJ; files without power use kcal as mechanical kJ (the usual 1:1 rule, since ~24% gross efficiency × 4.184 ≈ 1). Dedupe: an import key per start minute, plus a fuzzy match (start within 5 min, duration within 15%) against existing rides, including ones recorded in-game.
 - The share card is a 1080×1350 portrait PNG (Strava's photo aspect ratio), with a generated title chosen from the ride's most notable event result.
 
 ## Not done / blocked
